@@ -3,13 +3,14 @@ pragma solidity ^0.8.22;
 
 contract Twitter {
     struct Tweet {
+        uint id;
         address author;
         string content;
         uint256 timestamp;
         uint256 likes;
     }
 
-    mapping(address => Tweet[]) public tweet;
+    mapping(address => Tweet[]) public tweets;
     uint256 public maxTweetLength = 280;
     address public owner;
 
@@ -30,20 +31,32 @@ contract Twitter {
         require(bytes(_tweet).length <= maxTweetLength, "Tweet is to looonngg!");
 
         Tweet memory newTweet = Tweet({
+            id: tweets[msg.sender].length,
             author: msg.sender,
             content: _tweet,
             timestamp: block.timestamp,
             likes: 0
         });
 
-        tweet[msg.sender].push(newTweet);
+        tweets[msg.sender].push(newTweet);
     }
 
     function getTweet(uint idx) public view returns (Tweet memory) {
-        return tweet[msg.sender][idx];
+        return tweets[msg.sender][idx];
     }
 
     function getTweets() public view returns (Tweet[] memory) {
-        return tweet[msg.sender];
+        return tweets[msg.sender];
+    }
+
+    function likeTweet(address author, uint id) external {
+        require(tweets[author][id].id == id, "Tweet does not exists");
+        tweets[author][id].likes++;
+    }
+
+    function dislikeTweet(address author, uint id) external {
+        require(tweets[author][id].id == id, "Tweet does not exists");
+        require(tweets[author][id].likes > 0, "Tweet has no likes");
+        tweets[author][id].likes--;
     }
 }
