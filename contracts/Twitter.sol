@@ -10,10 +10,24 @@ contract Twitter {
     }
 
     mapping(address => Tweet[]) public tweet;
-    uint16 constant MAX_TWEET_LENGTH = 280;
+    uint256 public maxTweetLength = 280;
+    address public owner;
+
+    constructor() {
+        owner = msg.sender;
+    }
+
+    modifier onlyOwner() {
+        require(owner == msg.sender, "You are not the owner");
+        _;
+    }
+
+    function changeTweetLenght(uint256 newTweetLength) public onlyOwner {
+        maxTweetLength = newTweetLength;
+    }
 
     function createTweet(string memory _tweet) public {
-        require(bytes(_tweet).length <= MAX_TWEET_LENGTH, "Tweet is to looonngg!");
+        require(bytes(_tweet).length <= maxTweetLength, "Tweet is to looonngg!");
 
         Tweet memory newTweet = Tweet({
             author: msg.sender,
